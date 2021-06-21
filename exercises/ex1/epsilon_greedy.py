@@ -58,6 +58,12 @@ class MLE(object):
         return f"{repr(self)}: est: {self.est:1.3e}, trials: {self.trials}"
 
 
+def update_epsilon(eps_0: float, iter: int) -> float:
+    """Updates epsilon based on inital value and iteration count."""
+    alpha = 0.99
+    return eps_0 * alpha ** iter
+
+
 def run_experiment(
     bandits: List[Bandit], eps: float, num_trials: int
 ) -> Tuple[npt.NDArray[(NUM_TRIALS,), npt.Float64], List[MLE]]:
@@ -78,9 +84,12 @@ def run_experiment(
 
     n_bandits = len(bandits)
 
+    eps_0 = eps  # Initial value of epsilon
+
     # Perform a number of trials on the set of `Bandits`.
     for i in range(num_trials):
         # Draw random number. Choose between explore vs exploit.
+        eps = update_epsilon(eps_0, i)
         if npr.random() < eps:
             b_idx = npr.choice(n_bandits)
         else:
