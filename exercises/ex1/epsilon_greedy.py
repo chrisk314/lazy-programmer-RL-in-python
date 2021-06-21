@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
+"""This script explores the epsilon greedy algorithm for controlling
+the explore vs exploit decision process.
+"""
 from collections import deque
 from pprint import pprint
 import string
 from typing import Deque, List, Tuple
 
 from matplotlib import pyplot as plt
+import nptyping as npt
 import numpy as np
 from numpy import random as npr
 
@@ -56,21 +60,26 @@ class MLE(object):
 
 def run_experiment(
     bandits: List[Bandit], eps: float, num_trials: int
-) -> Tuple[List[float], List[MLE]]:
+) -> Tuple[npt.NDArray[(NUM_TRIALS,), npt.Float64], List[MLE]]:
+    """Runs an experiment on a set of bandits.
 
-    # Print some data about the bandits.
-    print("Bandit, mean, stddev")
-    for b in bandits:
-        print(b, b.loc, b.scale)
+    Args:
+        bandits: Bandits to extract rewards from.
+        eps: Probability of exploration vs. exploitation.
+        num_trials: Number of observations to make of the bandits.
 
+    Returns:
+        Tuple containing the reward vector for all trials and a
+            list of maximum likelihood estimates for the bandits.
+    """
     # Initialise `Bandit` MLE and reward state
-    bandit_mle = [MLE() for _ in bandits]
-    rewards: Deque = deque()
+    bandit_mle: List[MLE] = [MLE() for _ in bandits]
+    rewards: npt.NDArray = np.empty(num_trials)
 
     n_bandits = len(bandits)
 
     # Perform a number of trials on the set of `Bandits`.
-    for _ in range(num_trials):
+    for i in range(num_trials):
         # Draw random number. Choose between explore vs exploit.
         if npr.random() < eps:
             b_idx = npr.choice(n_bandits)
@@ -79,10 +88,10 @@ def run_experiment(
         b = bandits[b_idx]
         # Make an observation
         obs = b.pull()
-        rewards.append(obs)
+        rewards[i] = obs
         bandit_mle[b_idx].update(obs)
 
-    return list(rewards), bandit_mle
+    return rewards, bandit_mle
 
 
 def plot_rewards(rewards: List[float], eps: float) -> None:
@@ -105,6 +114,11 @@ if __name__ == "__main__":
     # Create a set of `Bandits`.
     bandit_config = [(0.1, 0.5), (0.8, 0.2), (0.5, 1.0), (0.6, 0.3), (0.9, 0.1)]
     bandits = [Bandit(loc=loc, scale=scale) for loc, scale in bandit_config]
+
+    # Print some data about the bandits.
+    print("Bandit, mean, stddev")
+    for b in bandits:
+        print(b, b.loc, b.scale)
 
     # Perform several experiments with different values of epsilon
     for eps in (0.01, 0.05, 0.10):
