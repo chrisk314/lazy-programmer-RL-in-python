@@ -4,6 +4,7 @@ from pprint import pprint
 import string
 from typing import Deque, List, Tuple
 
+from matplotlib import pyplot as plt
 import numpy as np
 from numpy import random as npr
 
@@ -84,17 +85,41 @@ def run_experiment(
     return list(rewards), bandit_mle
 
 
+def plot_rewards(rewards: List[float], eps: float) -> None:
+    """Plot rewards for current epsilon."""
+    cum_rewards = np.cumsum(rewards) / np.arange(1, len(rewards) + 1)
+    plt.plot(cum_rewards, label=f"{eps=}")
+
+
+def display_plot() -> None:
+    """Helper method to configure plot and display."""
+    plt.xlabel("iters")
+    plt.ylabel("average reward")
+    plt.xscale("log")
+    plt.legend()
+    plt.grid(which="both")
+    plt.show()
+
+
 if __name__ == "__main__":
     # Create a set of `Bandits`.
-    bandit_config = [(1.0, 0.5), (0.8, 0.2), (0.5, 1.0)]
+    bandit_config = [(0.1, 0.5), (0.8, 0.2), (0.5, 1.0), (0.6, 0.3), (0.9, 0.1)]
     bandits = [Bandit(loc=loc, scale=scale) for loc, scale in bandit_config]
 
-    rewards, bandit_mle = run_experiment(bandits, EPSILON, NUM_TRIALS)
-    avg_reward = sum(rewards) / NUM_TRIALS
-    print(f"Avg reward: {avg_reward}")
+    # Perform several experiments with different values of epsilon
+    for eps in (0.01, 0.05, 0.10):
+        print(f"\nepsilon={eps} ---------------")
+        rewards, bandit_mle = run_experiment(bandits, eps, NUM_TRIALS)
+        avg_reward = sum(rewards) / NUM_TRIALS
+        print(f"Avg reward: {avg_reward}")
 
-    pprint([str(mle) for mle in bandit_mle])
+        pprint([str(mle) for mle in bandit_mle])
 
-    b_idx = np.argmax([x.est for x in bandit_mle])
-    best_bandit = bandits[b_idx]
-    print(f"Best bandit: {best_bandit}")
+        b_idx = np.argmax([x.est for x in bandit_mle])
+        best_bandit = bandits[b_idx]
+        print(f"Best bandit: {best_bandit}")
+
+        # TODO : Add plotting.
+        plot_rewards(rewards, eps)
+
+    display_plot()
