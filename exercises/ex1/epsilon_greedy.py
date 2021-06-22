@@ -27,15 +27,14 @@ def rand_str(size: int = 4) -> str:
 class Bandit(object):
     """`Bandit` represents a \"one-armed bandit\" slot machine."""
 
-    def __init__(self, loc: float = 1.0, scale: float = 0.5) -> None:
+    def __init__(self, p: float = 1.0) -> None:
         """Instantiates `Bandit`."""
-        self.loc = loc
-        self.scale = scale
+        self.p = p
         self._id = rand_str()
 
     def pull(self) -> float:
         """Returns a random outcome for the `Bandit`."""
-        return npr.normal(loc=self.loc, scale=self.scale)
+        return float(int(npr.random() < self.p))
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}-{self._id}"
@@ -89,7 +88,7 @@ def run_experiment(
     # Perform a number of trials on the set of `Bandits`.
     for i in range(num_trials):
         # Draw random number. Choose between explore vs exploit.
-        eps = update_epsilon(eps_0, i)
+        # eps = update_epsilon(eps_0, i)
         if npr.random() < eps:
             b_idx = npr.choice(n_bandits)
         else:
@@ -121,13 +120,13 @@ def display_plot() -> None:
 
 if __name__ == "__main__":
     # Create a set of `Bandits`.
-    bandit_config = [(0.1, 0.5), (0.8, 0.2), (0.5, 1.0), (0.6, 0.3), (0.9, 0.1)]
-    bandits = [Bandit(loc=loc, scale=scale) for loc, scale in bandit_config]
+    bandit_config = [0.1, 0.5, 0.8]
+    bandits = [Bandit(p=p) for p in bandit_config]
 
     # Print some data about the bandits.
-    print("Bandit, mean, stddev")
+    print("Bandit, p")
     for b in bandits:
-        print(b, b.loc, b.scale)
+        print(b, b.p)
 
     # Perform several experiments with different values of epsilon
     for eps in (0.01, 0.05, 0.10):
