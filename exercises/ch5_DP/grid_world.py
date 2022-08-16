@@ -26,6 +26,8 @@ ACTIONS: ActionsDict = {
 class GridWorld:
     """`GridWorld` represents a 2D grid environment for an RL agent."""
 
+    _default_reward: float = 0.0
+
     def __init__(
         self, rows: int, cols: int, start: IntVec2d, actions: ActionsDict, rewards: RewardsDict
     ) -> None:
@@ -61,10 +63,9 @@ class GridWorld:
 
     def act(self, action: IntVec2d) -> Tuple[IntVec2d, float]:
         """Takes specified `action` and returns new _state and reward."""
-        if action not in self._actions[self._state]:
-            return self._state, 0.0
-        self._state = self._update_state(action)
-        reward = self._rewards.get(self._state, 0.0)
+        if action in self._actions[self._state]:
+            self._state = self._update_state(action)
+        reward = self._rewards.get(self._state, self._default_reward)
         return self._state, reward
 
     def is_active(self) -> bool:
