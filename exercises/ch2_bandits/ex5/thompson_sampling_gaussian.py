@@ -59,9 +59,8 @@ class MLE(object):
         """Updates MLE with an observation and returns new value."""
         self.trials += 1
         self.sum_obs += obs
-        pred_prec_0 = self.pred_prec
         self.pred_prec += self.prec
-        self.pred_mean = (1.0 / self.pred_prec) * (self.prec * self.sum_obs)
+        self.pred_mean = (self.prec * self.sum_obs) / self.pred_prec
         return self.pred_mean, self.pred_prec
 
     def __str__(self) -> str:
