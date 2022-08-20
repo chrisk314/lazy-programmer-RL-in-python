@@ -1,15 +1,15 @@
-from typing import Dict, Set, Tuple
+import sys
+import typing as _t
 
 
-IntVec2d = Tuple[int, int]
-RewardsDict = Dict[IntVec2d, float]
-ActionsDict = Dict[IntVec2d, Set[IntVec2d]]
+IntVec2d = _t.Tuple[int, int]
+ActionSpace = _t.Tuple[IntVec2d]
+ActionsDict = _t.Dict[IntVec2d, _t.Set[IntVec2d]]
+RewardsDict = _t.Dict[IntVec2d, float]
 
-REWARDS: RewardsDict = {
-    (0, 3): 1,
-    (1, 3): -1,
-}
 _U, _R, _D, _L = (-1, 0), (0, 1), (1, 0), (0, -1)
+ACTION_SPACE: _t.Tuple[IntVec2d, ...] = (_U, _R, _D, _L)
+# Grid world coords (-y, x) with (0, 0) at top left corner
 ACTIONS: ActionsDict = {
     (0, 0): set([_R, _D]),
     (0, 1): set([_R, _L]),
@@ -21,6 +21,10 @@ ACTIONS: ActionsDict = {
     (2, 2): set([_U, _R, _L]),
     (2, 3): set([_U, _L]),
 }
+REWARDS: RewardsDict = {
+    (0, 3): 1,
+    (1, 3): -1,
+}
 
 
 class GridWorld:
@@ -28,49 +32,54 @@ class GridWorld:
 
     _default_reward: float = 0.0
 
-    def __init__(
-        self, rows: int, cols: int, start: IntVec2d, actions: ActionsDict, rewards: RewardsDict
-    ) -> None:
+    def __init__(self, rows: int, cols: int, actions: ActionsDict, rewards: RewardsDict) -> None:
         """Instantiates `GridWorld`.
 
         Args:
             rows: Number of rows in the grid (y axis).
             cols: Number of columns in the grid (x axis).
-            start: Starting location in the grid.
             actions: Possible actions for the agent.
             rewards: Rewards for the states.
         """
         self._rows: int = rows
         self._cols: int = cols
-        self._state: IntVec2d = start
         self._actions: ActionsDict = actions
         self._rewards: RewardsDict = rewards
 
     @property
-    def state(self) -> IntVec2d:
-        return self._state
+    def states(self) -> _t.Tuple[IntVec2d, ...]:
+        return tuple(
+            sorted(
+                tuple(self._actions.keys()) + tuple(self._rewards.keys()),
+                key=lambda x: (x[0], x[1]),
+            )
+        )
 
-    def _update_state(self, action: IntVec2d) -> IntVec2d:
-        i, j = self._state
+    @property
+    def actions(self) -> ActionsDict:
+        return self._actions
+
+    def _update_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
+        if not action in self._actions[state]:
+            return state
+        i, j = state
         di, dj = action
-        new__state = (i + di, j + dj)
-        in_x = 0 <= new__state[0] < self._cols
-        in_y = 0 <= new__state[1] < self._rows
+        new_state = (i + di, j + dj)
+        in_x = 0 <= new_state[0] < self._rows
+        in_y = 0 <= new_state[1] < self._cols
         if in_x and in_y:
-            self._state = new__state
-            return new__state
+            return new_state
         raise ValueError("Action takes _state out of bounds.")
 
-    def act(self, action: IntVec2d) -> Tuple[IntVec2d, float]:
+    def act(self, state: IntVec2d, action: IntVec2d) -> _t.Tuple[IntVec2d, float]:
         """Takes specified `action` and returns new _state and reward."""
-        if action in self._actions[self._state]:
-            self._state = self._update_state(action)
-        reward = self._rewards.get(self._state, self._default_reward)
-        return self._state, reward
+        new_state = self._update_state(state, action)
+        reward = self._rewards.get(new_state, self._default_reward)
+        return new_state, reward
 
-    def is_active(self) -> bool:
+    def is_active(self, state: IntVec2d) -> bool:
         """Returns True iff the episode is active."""
-        return self._state in self._actions.keys()
+        return state in self._actions.keys()
 
 
 def policy(state: IntVec2d) -> IntVec2d:
@@ -78,14 +87,15 @@ def policy(state: IntVec2d) -> IntVec2d:
     pass
 
 
-def main() -> None:
+def main() -> int:
     """Entrypoint for RL run."""
-    E = GridWorld(3, 4, (0, 0), ACTIONS, REWARDS)
-    s = E.state
-    while E.is_active():
+    E = GridWorld(3, 4, ACTIONS, REWARDS)
+    s = (2, 0)
+    while E.is_active(s):
         a = policy(s)
-        s, r = E.act(a)
+        s, r = E.act(s, a)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
