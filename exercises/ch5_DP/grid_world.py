@@ -1,4 +1,4 @@
-import sys
+import random
 import typing as _t
 
 
@@ -59,12 +59,16 @@ class GridWorld:
     def actions(self) -> ActionsDict:
         return self._actions
 
-    def _update_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
-        if not action in self._actions[state]:
-            return state
+    def _get_next_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
         i, j = state
         di, dj = action
         new_state = (i + di, j + dj)
+        return new_state
+
+    def _update_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
+        if not action in self._actions[state]:
+            return state
+        new_state = self._get_next_state(state, action)
         in_x = 0 <= new_state[0] < self._rows
         in_y = 0 <= new_state[1] < self._cols
         if in_x and in_y:
@@ -82,20 +86,33 @@ class GridWorld:
         return state in self._actions.keys()
 
 
-def policy(state: IntVec2d) -> IntVec2d:
-    """Returns action to take based on state."""
-    pass
+class WindyGridWorld(GridWorld):
 
+    _trans_prob = {
+        ((0, 0), _R): (((0, 1), 1.0),),
+        ((0, 0), _D): (((1, 0), 1.0),),
+        ((0, 1), _R): (((0, 2), 1.0),),
+        ((0, 1), _L): (((0, 0), 1.0),),
+        ((0, 2), _R): (((0, 3), 1.0),),
+        ((0, 2), _D): (((1, 2), 1.0),),
+        ((0, 2), _L): (((0, 1), 1.0),),
+        ((1, 0), _U): (((0, 0), 1.0),),
+        ((1, 0), _D): (((2, 0), 1.0),),
+        ((1, 2), _U): (((0, 2), 0.5), ((1, 3), 0.5)),
+        ((1, 2), _R): (((1, 3), 1.0),),
+        ((1, 2), _D): (((2, 2), 1.0),),
+        ((2, 0), _U): (((1, 0), 1.0),),
+        ((2, 0), _R): (((2, 1), 1.0),),
+        ((2, 1), _R): (((2, 2), 1.0),),
+        ((2, 1), _L): (((2, 0), 1.0),),
+        ((2, 2), _U): (((1, 2), 1.0),),
+        ((2, 2), _R): (((2, 3), 1.0),),
+        ((2, 2), _L): (((2, 1), 1.0),),
+        ((2, 3), _U): (((1, 3), 1.0),),
+        ((2, 3), _L): (((2, 2), 1.0),),
+    }
 
-def main() -> int:
-    """Entrypoint for RL run."""
-    E = GridWorld(3, 4, ACTIONS, REWARDS)
-    s = (2, 0)
-    while E.is_active(s):
-        a = policy(s)
-        s, r = E.act(s, a)
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+    def _get_next_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
+        p_s2 = self._trans_prob[(state, action)]
+        new_state = random.choices(p_s2, weights=[x[1] for x in p_s2])[0][0]
+        return new_state

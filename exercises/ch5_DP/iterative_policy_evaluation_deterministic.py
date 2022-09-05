@@ -22,7 +22,7 @@ GAMMA: float = 0.90
 DELTA_CONV: float = 1.0e-3
 LARGE: float = 1.0e32
 PolicyDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float]
-TransProbDict = _t.Dict
+TransProbDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 RewardsDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 
 POLICY: PolicyDict = {
