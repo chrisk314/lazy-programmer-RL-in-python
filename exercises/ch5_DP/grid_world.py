@@ -47,6 +47,10 @@ class GridWorld:
         self._rewards: RewardsDict = rewards
 
     @property
+    def rewards(self) -> RewardsDict:
+        return self._rewards
+
+    @property
     def states(self) -> _t.Tuple[IntVec2d, ...]:
         return tuple(
             sorted(
@@ -111,6 +115,10 @@ class WindyGridWorld(GridWorld):
         ((2, 3), _U): (((1, 3), 1.0),),
         ((2, 3), _L): (((2, 2), 1.0),),
     }
+
+    @property
+    def trans_prob(self) -> _t.Dict:
+        return self._trans_prob
 
     def _get_next_state(self, state: IntVec2d, action: IntVec2d) -> IntVec2d:
         p_s2 = self._trans_prob[(state, action)]
