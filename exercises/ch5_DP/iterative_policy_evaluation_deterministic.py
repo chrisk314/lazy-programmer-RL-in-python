@@ -64,10 +64,15 @@ def get_policy() -> PolicyDict:
 
 
 def evaluate_policy(
-    env: GridWorld, policy: PolicyDict, trans_prob: TransProbDict, rewards: _t.Dict
+    env: GridWorld,
+    policy: PolicyDict,
+    trans_prob: TransProbDict,
+    rewards: _t.Dict,
+    initial_values: _t.Optional[dict] = None,
 ) -> _t.Dict:
     # TODO : `GridWorld` should implement an `Environment` interface.
-    V = {s: 0.0 for s in env.states}
+    initial_values = initial_values or {}
+    V = {s: initial_values.get(s, 0.0) for s in env.states}
     iter = 0
     while True:
         max_delta = 0.0
