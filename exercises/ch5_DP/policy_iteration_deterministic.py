@@ -5,12 +5,14 @@ import typing as _t
 from grid_world import ACTIONS, GridWorld, IntVec2d, REWARDS
 from iterative_policy_evaluation_deterministic import (
     evaluate_policy,
-    GAMMA,
     get_policy,
     get_transition_prob_and_rewards,
     PolicyDict,
     TransProbDict,
 )
+
+
+GAMMA: float = 0.90
 
 
 def improve_policy(

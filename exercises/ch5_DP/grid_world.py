@@ -22,8 +22,8 @@ ACTIONS: ActionsDict = {
     (2, 3): set([_U, _L]),
 }
 REWARDS: RewardsDict = {
-    (0, 3): 1,
-    (1, 3): -1,
+    (0, 3): 1.0,
+    (1, 3): -1.0,
 }
 
 
@@ -143,4 +143,5 @@ class WindyGridWorldPenalised(WindyGridWorld):
     def _penalise_states(self, penalty: float) -> None:
         if penalty > 0.0:
             raise ValueError(f"Penalty must be negative.")
+        # self._default_reward = penalty
         self._rewards.update({s: penalty for s in self.states if s not in self._rewards})

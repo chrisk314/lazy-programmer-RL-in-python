@@ -2,22 +2,21 @@ from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import ACTIONS, REWARDS, WindyGridWorldPenalised
-from iterative_policy_evaluation_deterministic import (
-    evaluate_policy,
-    GAMMA,
-    get_policy,
-    get_transition_prob_and_rewards,
-    PolicyDict,
-    print_values,
-    TransProbDict,
-)
+from grid_world import ACTIONS, REWARDS, WindyGridWorld, WindyGridWorldPenalised
+from iterative_policy_evaluation_deterministic import evaluate_policy, get_policy
+from iterative_policy_evaluation_probabilistic import get_transition_prob_and_rewards
 from policy_iteration_deterministic import improve_policy
 
 
+GAMMA: float = 0.90
+
+
 def main() -> int:
-    penalty = -0.0
+    # FIXME : `WindyGridWorldPenalised` gives strange values even with `penalty=0.0`,
+    #       : for which the values should be the same as `WindyGridWorld`.
+    penalty = 0.0
     env = WindyGridWorldPenalised(penalty, 3, 4, ACTIONS, REWARDS)
+    # env = WindyGridWorld(3, 4, ACTIONS, REWARDS)
     P, R = get_transition_prob_and_rewards(env)
     Pi = get_policy()
     V: dict = {}
