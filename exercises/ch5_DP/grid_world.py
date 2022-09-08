@@ -91,6 +91,10 @@ class GridWorld:
 
 
 class WindyGridWorld(GridWorld):
+    """`WindyGridWorld` is a `GridWorld` with some stochastic elements.
+
+    Extends `GridWorld`.
+    """
 
     _trans_prob = {
         ((0, 0), _R): (((0, 1), 1.0),),
@@ -124,3 +128,19 @@ class WindyGridWorld(GridWorld):
         p_s2 = self._trans_prob[(state, action)]
         new_state = random.choices(p_s2, weights=[x[1] for x in p_s2])[0][0]
         return new_state
+
+
+class WindyGridWorldPenalised(WindyGridWorld):
+    """`WindyGridWorldPenalised` is a `WindyGridWorld` with penalties in non-terminal states.
+
+    Extends `WindyGridWorld`.
+    """
+
+    def __init__(self, penalty: float, *args: _t.Any, **kwargs: _t.Any) -> None:
+        super().__init__(*args, **kwargs)  # type: ignore
+        self._penalise_states(penalty)
+
+    def _penalise_states(self, penalty: float) -> None:
+        if penalty > 0.0:
+            raise ValueError(f"Penalty must be negative.")
+        self._rewards.update({s: penalty for s in self.states if s not in self._rewards})
