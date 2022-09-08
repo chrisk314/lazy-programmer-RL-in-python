@@ -2,26 +2,13 @@ from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import (
-    _D,
-    _L,
-    _R,
-    _U,
-    ACTION_SPACE,
-    ACTIONS,
-    ActionsDict,
-    ActionSpace,
-    GridWorld,
-    IntVec2d,
-    REWARDS,
-)
+from grid_world import ACTIONS, GridWorld, IntVec2d, REWARDS
 from iterative_policy_evaluation_deterministic import (
     evaluate_policy,
     GAMMA,
     get_policy,
     get_transition_prob_and_rewards,
     PolicyDict,
-    print_values,
     TransProbDict,
 )
 
@@ -57,7 +44,7 @@ def main() -> int:
     env = GridWorld(3, 4, ACTIONS, REWARDS)
     P, R = get_transition_prob_and_rewards(env)
     Pi = get_policy()
-    V = {}
+    V: dict = {}
     iter = 0
     while True:
         iter += 1
