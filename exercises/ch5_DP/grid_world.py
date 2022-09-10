@@ -54,7 +54,7 @@ class GridWorld:
     def states(self) -> _t.Tuple[IntVec2d, ...]:
         return tuple(
             sorted(
-                tuple(self._actions.keys()) + tuple(self._rewards.keys()),
+                set(self._actions.keys()) | set(self._rewards.keys()),
                 key=lambda x: (x[0], x[1]),
             )
         )
