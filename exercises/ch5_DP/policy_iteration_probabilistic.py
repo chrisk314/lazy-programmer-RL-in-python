@@ -17,6 +17,7 @@ def main() -> int:
     env = WindyGridWorldPenalised(PENALTY, 3, 4, ACTIONS, REWARDS)
     P, R = get_transition_prob_and_rewards(env)
     Pi = get_policy()
+    print_policy(env, Pi)
     V: dict = {}
     iter = 0
     while True:
@@ -24,9 +25,9 @@ def main() -> int:
         print(f"\nPolicy improvement {iter=}")
         V = evaluate_policy(env, Pi, P, R, initial_values=V)
         Pi, Pi_is_conv = improve_policy(env, Pi, P, R, V)
+        print_policy(env, Pi)
         if Pi_is_conv:
             break
-    print_policy(env, Pi)
     return 0
 
 

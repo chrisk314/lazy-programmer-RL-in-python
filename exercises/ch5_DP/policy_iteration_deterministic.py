@@ -1,4 +1,3 @@
-from pprint import pprint
 import sys
 import typing as _t
 
@@ -8,6 +7,7 @@ from iterative_policy_evaluation_deterministic import (
     get_policy,
     get_transition_prob_and_rewards,
     PolicyDict,
+    print_policy,
     TransProbDict,
 )
 
@@ -26,7 +26,7 @@ def improve_policy(
     for s in env.states:
         v_best: float = float("-inf")
         a_best: _t.Optional[IntVec2d] = None
-        for a in env.actions:
+        for a in env.actions.get(s, set()):
             v: float = 0.0
             for s2 in env.states:
                 r: float = rewards.get((s, a, s2), 0.0)
@@ -46,6 +46,7 @@ def main() -> int:
     env = GridWorld(3, 4, ACTIONS, REWARDS)
     P, R = get_transition_prob_and_rewards(env)
     Pi = get_policy()
+    print_policy(env, Pi)
     V: dict = {}
     iter = 0
     while True:
@@ -53,6 +54,7 @@ def main() -> int:
         print(f"\nPolicy improvement {iter=}")
         V = evaluate_policy(env, Pi, P, R, initial_values=V)
         Pi, Pi_is_conv = improve_policy(env, Pi, P, R, V)
+        print_policy(env, Pi)
         if Pi_is_conv:
             break
     return 0

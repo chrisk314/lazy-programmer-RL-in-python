@@ -25,15 +25,15 @@ TransProbDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 RewardsDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 
 POLICY: PolicyDict = {
-    ((0, 0), _R): 1.0,
-    ((0, 1), _R): 1.0,
-    ((0, 2), _R): 1.0,
-    ((1, 0), _U): 1.0,
-    ((1, 2), _U): 1.0,
-    ((2, 0), _U): 1.0,
-    ((2, 1), _R): 1.0,
-    ((2, 2), _U): 1.0,
-    ((2, 3), _L): 1.0,
+    (0, 0): _R,
+    (0, 1): _R,
+    (0, 2): _R,
+    (1, 0): _U,
+    (1, 2): _U,
+    (2, 0): _U,
+    (2, 1): _R,
+    (2, 2): _U,
+    (2, 3): _L,
 }
 
 
@@ -48,17 +48,11 @@ def print_values(env: GridWorld, V: _t.Dict) -> None:
 
 def print_policy(env: GridWorld, policy: PolicyDict) -> None:
     print("Policy visualisation:")
-    policy_actions = {}
-    for s in env.states:
-        p_max = 0.0
-        for a in ACTION_SPACE:
-            if (pi_sa := policy.get((s, a), 0.0)) > p_max:
-                p_max = pi_sa
-                policy_actions[s] = ACTION_TO_STR_MAP[a]
-
     print(f" {''.join([str(j) for j in range(env.cols)])}")
     for i in range(env.rows):
-        print(f"{i}{''.join([policy_actions.get((i, j), ' ') for j in range(env.cols)])}")
+        print(
+            f"{i}{''.join([ACTION_TO_STR_MAP.get(policy.get((i, j)), ' ') for j in range(env.cols)])}"
+        )
 
 
 def get_transition_prob_and_rewards(env: GridWorld) -> _t.Tuple[TransProbDict, RewardsDict]:
@@ -98,7 +92,7 @@ def evaluate_policy(
                     r_sas2 = rewards.get((s, a, s2), 0.0)
                     if all(
                         (
-                            pi_sa := policy.get((s, a), 0.0),
+                            pi_sa := float(policy.get(s) == a),
                             p_sas2 := trans_prob.get((s, a, s2), 0.0),
                         )
                     ):

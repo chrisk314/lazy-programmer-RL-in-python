@@ -1,33 +1,16 @@
-from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import _D, _L, _R, _U, ACTIONS, GridWorld, REWARDS, WindyGridWorld
+from grid_world import ACTIONS, GridWorld, REWARDS, WindyGridWorld
 from iterative_policy_evaluation_deterministic import (
     evaluate_policy,
     get_policy,
-    PolicyDict,
     RewardsDict,
     TransProbDict,
 )
-import numpy as np
 
 
 GAMMA: float = 0.90
-
-# Policy is now probabilistic for cell (2, 0)
-POLICY: PolicyDict = {
-    ((0, 0), _R): 1.0,
-    ((0, 1), _R): 1.0,
-    ((0, 2), _R): 1.0,
-    ((1, 0), _U): 1.0,
-    ((1, 2), _U): 1.0,
-    ((2, 0), _U): 0.5,
-    ((2, 0), _R): 0.5,
-    ((2, 1), _R): 1.0,
-    ((2, 2), _U): 1.0,
-    ((2, 3), _L): 1.0,
-}
 
 
 def get_transition_prob_and_rewards(env: GridWorld) -> _t.Tuple[TransProbDict, RewardsDict]:
