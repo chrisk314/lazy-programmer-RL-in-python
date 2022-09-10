@@ -2,7 +2,18 @@ from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import _D, _L, _R, _U, ACTIONS, GridWorld, IntVec2d, REWARDS
+from grid_world import (
+    _D,
+    _L,
+    _R,
+    _U,
+    ACTION_SPACE,
+    ACTION_TO_STR_MAP,
+    ACTIONS,
+    GridWorld,
+    IntVec2d,
+    REWARDS,
+)
 import numpy as np
 
 
@@ -33,6 +44,21 @@ def print_values(env: GridWorld, V: _t.Dict) -> None:
         for j in range(env._cols):
             V_arr[i, j] = V.get((i, j), 0.0)
     print(V_arr)
+
+
+def print_policy(env: GridWorld, policy: PolicyDict) -> None:
+    print("Policy visualisation:")
+    policy_actions = {}
+    for s in env.states:
+        p_max = 0.0
+        for a in ACTION_SPACE:
+            if (pi_sa := policy.get((s, a), 0.0)) > p_max:
+                p_max = pi_sa
+                policy_actions[s] = ACTION_TO_STR_MAP[a]
+
+    print(f" {''.join([str(j) for j in range(env.cols)])}")
+    for i in range(env.rows):
+        print(f"{i}{''.join([policy_actions.get((i, j), ' ') for j in range(env.cols)])}")
 
 
 def get_transition_prob_and_rewards(env: GridWorld) -> _t.Tuple[TransProbDict, RewardsDict]:

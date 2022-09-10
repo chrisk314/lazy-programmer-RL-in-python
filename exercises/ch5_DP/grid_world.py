@@ -9,6 +9,7 @@ RewardsDict = _t.Dict[IntVec2d, float]
 
 _U, _R, _D, _L = (-1, 0), (0, 1), (1, 0), (0, -1)
 ACTION_SPACE: _t.Tuple[IntVec2d, ...] = (_U, _R, _D, _L)
+ACTION_TO_STR_MAP = {(-1, 0): "U", (0, 1): "R", (1, 0): "D", (0, -1): "L"}
 # Grid world coords (-y, x) with (0, 0) at top left corner
 ACTIONS: ActionsDict = {
     (0, 0): set([_R, _D]),
@@ -45,6 +46,14 @@ class GridWorld:
         self._cols: int = cols
         self._actions: ActionsDict = actions
         self._rewards: RewardsDict = rewards
+
+    @property
+    def rows(self) -> int:
+        return self._rows
+
+    @property
+    def cols(self) -> int:
+        return self._cols
 
     @property
     def rewards(self) -> RewardsDict:
