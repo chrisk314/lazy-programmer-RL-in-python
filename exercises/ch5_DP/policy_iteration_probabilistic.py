@@ -15,6 +15,7 @@ PENALTY: float = -0.1
 def main() -> int:
     # FIXME : `WindyGridWorldPenalised` gives strange values even with `penalty=0.0`,
     #       : for which the values should be the same as `WindyGridWorld`.
+    print(f"Penalty term: {PENALTY}")
     env = WindyGridWorldPenalised(PENALTY, 3, 4, ACTIONS, REWARDS)
     P, R = get_transition_prob_and_rewards(env)
     Pi = get_policy()
