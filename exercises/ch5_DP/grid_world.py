@@ -46,6 +46,9 @@ class GridWorld:
         self._cols: int = cols
         self._actions: ActionsDict = actions
         self._rewards: RewardsDict = rewards
+        self._terminal_states: _t.Tuple[IntVec2d, ...] = tuple(
+            sorted(self._rewards.keys(), key=lambda x: (x[0], x[1]))
+        )
 
     @property
     def rows(self) -> int:
@@ -67,6 +70,10 @@ class GridWorld:
                 key=lambda x: (x[0], x[1]),
             )
         )
+
+    @property
+    def terminal_states(self) -> _t.Tuple[IntVec2d, ...]:
+        return self._terminal_states
 
     @property
     def actions(self) -> ActionsDict:
@@ -93,10 +100,6 @@ class GridWorld:
         new_state = self._update_state(state, action)
         reward = self._rewards.get(new_state, self._default_reward)
         return new_state, reward
-
-    def is_active(self, state: IntVec2d) -> bool:
-        """Returns True iff the episode is active."""
-        return state in self._actions.keys()
 
 
 class WindyGridWorld(GridWorld):
