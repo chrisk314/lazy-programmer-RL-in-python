@@ -2,25 +2,14 @@ from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import (
-    _D,
-    _L,
-    _R,
-    _U,
-    ACTION_SPACE,
-    ACTION_TO_STR_MAP,
-    ACTIONS,
-    GridWorld,
-    IntVec2d,
-    REWARDS,
-)
+from grid_world import _D, _L, _R, _U, ACTION_TO_STR_MAP, ACTIONS, GridWorld, IntVec2d, REWARDS
 import numpy as np
 
 
 GAMMA: float = 0.90
 DELTA_CONV: float = 1.0e-3
 LARGE: float = 1.0e32
-PolicyDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float]
+PolicyDict = _t.Dict[IntVec2d, IntVec2d]
 TransProbDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 RewardsDict = _t.Dict[_t.Tuple[IntVec2d, IntVec2d, IntVec2d], float]
 

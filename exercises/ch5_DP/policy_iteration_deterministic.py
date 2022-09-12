@@ -21,7 +21,7 @@ def improve_policy(
     trans_prob: TransProbDict,
     rewards: dict,
     values: dict,
-) -> tuple[PolicyDict, bool]:
+) -> _t.Tuple[PolicyDict, bool]:
     policy_is_converged: bool = True
     for s in env.states:
         v_best: float = float("-inf")
@@ -38,7 +38,7 @@ def improve_policy(
         if policy.get(s) != a_best:
             # Update policy if better action found.
             policy_is_converged = False
-            policy[s] = a_best
+            policy[s] = a_best  # type: ignore
     return policy, policy_is_converged
 
 
