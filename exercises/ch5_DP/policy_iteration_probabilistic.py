@@ -1,9 +1,9 @@
 import sys
 
-from grid_world import ACTIONS, REWARDS, WindyGridWorldPenalised
-from iterative_policy_evaluation_deterministic import evaluate_policy, get_policy, print_policy
-from iterative_policy_evaluation_probabilistic import get_transition_prob_and_rewards
-from policy_iteration_deterministic import improve_policy
+from .grid_world import ACTIONS, REWARDS, WindyGridWorldPenalised
+from .iterative_policy_evaluation_deterministic import evaluate_policy, get_policy, print_policy
+from .iterative_policy_evaluation_probabilistic import get_transition_prob_and_rewards
+from .policy_iteration_deterministic import improve_policy
 
 
 GAMMA: float = 0.90

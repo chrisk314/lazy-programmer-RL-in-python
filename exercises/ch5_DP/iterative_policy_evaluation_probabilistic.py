@@ -1,8 +1,8 @@
 import sys
 import typing as _t
 
-from grid_world import ACTIONS, GridWorld, REWARDS, WindyGridWorld
-from iterative_policy_evaluation_deterministic import (
+from .grid_world import ACTIONS, GridWorld, REWARDS, WindyGridWorld
+from .iterative_policy_evaluation_deterministic import (
     evaluate_policy,
     get_policy,
     RewardsDict,

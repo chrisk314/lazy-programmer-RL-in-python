@@ -1,9 +1,8 @@
-from pprint import pprint
 import sys
 import typing as _t
 
-from grid_world import _D, _L, _R, _U, ACTION_TO_STR_MAP, ACTIONS, GridWorld, IntVec2d, REWARDS
 import numpy as np
+from .grid_world import _D, _L, _R, _U, ACTION_TO_STR_MAP, ACTIONS, GridWorld, IntVec2d, REWARDS
 
 
 GAMMA: float = 0.90
