@@ -24,7 +24,6 @@ from ..ch5_DP.iterative_policy_evaluation_deterministic import (
 
 
 GAMMA: float = 0.90
-PENALTY: float = -0.0
 MC_MAX_EPISODES: int = 10000
 MC_MAX_STEPS: int = 100
 MC_FIRST_VISIT: bool = False
