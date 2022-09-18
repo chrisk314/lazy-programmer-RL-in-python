@@ -91,7 +91,9 @@ def main() -> int:
                 Q[sa] = (Q[sa] * G_sa_cnt[sa] + G) / (G_sa_cnt[sa] + 1)
                 G_sa_cnt[sa] += 1
                 # Update the policy with the argmax action over Q
-                Pi[s[step]] = ACTION_SPACE[np.argmax([Q[(s[step], _a)] for _a in ACTION_SPACE])]
+                Q_a = [Q[(s[step], _a)] for _a in ACTION_SPACE]
+                Q_a_max_idxs = np.argwhere(Q_a == np.max(Q_a))
+                Pi[s[step]] = ACTION_SPACE[random.choice(Q_a_max_idxs.flat)]
 
         # print(f"Episode {epsd}")
         # print_values(env, V)
