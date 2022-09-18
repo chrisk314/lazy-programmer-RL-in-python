@@ -55,7 +55,7 @@ def main() -> int:
     Q: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float] = {
         (s, a): 0.0 for (s, a) in product(env.states, ACTION_SPACE)
     }
-    G_sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int] = defaultdict(list)
+    G_sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int] = defaultdict(lambda: 0)
 
     for epsd in range(1, MC_MAX_EPISODES + 1):
         # Play Monte Carlo episode.
@@ -72,13 +72,13 @@ def main() -> int:
         # For all steps after the first, choose the action from the policy.
         step: int = 1
         while step < MC_MAX_STEPS:
+            if s2 in env.terminal_states:
+                break
             a += [Pi[s[step]]]
             s2, _r = env.act(s[step], a[step])
             s += [s2]
             r += [_r]
             step += 1
-            if s2 in env.terminal_states:
-                break
 
         sa_seq = list(zip(s[:step], a[:step]))
         # Update state values.
@@ -96,6 +96,7 @@ def main() -> int:
         # print(f"Episode {epsd}")
         # print_values(env, V)
     print(f"Episode {epsd}")
+    print_policy(env, Pi)
     # TODO : How to get the values from Q?
     # print_values(env, V)
 
