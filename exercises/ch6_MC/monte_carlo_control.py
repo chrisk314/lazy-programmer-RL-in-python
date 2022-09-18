@@ -14,6 +14,7 @@ from ..ch5_DP.grid_world import (
     WindyGridWorldPenalised,
 )
 from ..ch5_DP.iterative_policy_evaluation_deterministic import (
+    DELTA_CONV,
     get_policy,
     PolicyDict,
     print_policy,
@@ -23,7 +24,7 @@ from ..ch5_DP.iterative_policy_evaluation_deterministic import (
 
 GAMMA: float = 0.90
 PENALTY: float = -0.0
-MC_MAX_EPISODES: int = 100
+MC_MAX_EPISODES: int = 10000
 MC_MAX_STEPS: int = 100
 MC_FIRST_VISIT: bool = False
 MC_RANDOM_SEED: _t.Optional[int] = None
@@ -80,6 +81,7 @@ def main() -> int:
             r += [_r]
             step += 1
 
+        max_delta = 0.0
         sa_seq = list(zip(s[:step], a[:step]))
         # Update state values.
         G: float = 0.0
@@ -88,13 +90,23 @@ def main() -> int:
             sa = sa_seq[step]
             G = r[step + 1] + GAMMA * G
             if not (MC_FIRST_VISIT and sa in set(sa_seq[:step])):
-                Q[sa] = (Q[sa] * G_sa_cnt[sa] + G) / (G_sa_cnt[sa] + 1)
+                # Update estimate of Q
                 G_sa_cnt[sa] += 1
+                Q_prev = Q[sa]
+                Q[sa] = Q_prev + (G - Q_prev) / G_sa_cnt[sa]
+
                 # Update the policy with the argmax action over Q
                 Q_a = [Q[(s[step], _a)] for _a in ACTION_SPACE]
                 Q_a_max_idxs = np.argwhere(Q_a == np.max(Q_a))
                 Pi[s[step]] = ACTION_SPACE[random.choice(Q_a_max_idxs.flat)]
 
+                # Track biggest delta in Q for convergence check
+                if (delta := abs(Q[sa] - Q_prev)) > max_delta:
+                    max_delta = delta
+
+        # Check for convergence of Q
+        if max_delta < DELTA_CONV:
+            break
         # print(f"Episode {epsd}")
         # print_values(env, V)
     print(f"Episode {epsd}")
