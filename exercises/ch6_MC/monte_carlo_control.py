@@ -58,6 +58,7 @@ def main() -> int:
     }
     G_sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int] = defaultdict(lambda: 0)
 
+    delta: _t.List[float] = []
     for epsd in range(1, MC_MAX_EPISODES + 1):
         # Play Monte Carlo episode.
         s: _t.List[IntVec2d] = [get_random_state(env)]
@@ -101,16 +102,15 @@ def main() -> int:
                 Pi[s[step]] = ACTION_SPACE[random.choice(Q_a_max_idxs.flat)]
 
                 # Track biggest delta in Q for convergence check
-                if (delta := abs(Q[sa] - Q_prev)) > max_delta:
-                    max_delta = delta
+                if (_delta := abs(Q[sa] - Q_prev)) > max_delta:
+                    max_delta = _delta
 
-        # Check for convergence of Q
-        if max_delta < DELTA_CONV:
-            break
+        delta += [max_delta]
         # print(f"Episode {epsd}")
         # print_values(env, V)
     print(f"Episode {epsd}")
     print_policy(env, Pi)
+
     # TODO : How to get the values from Q?
     # print_values(env, V)
 
