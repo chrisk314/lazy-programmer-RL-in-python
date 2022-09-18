@@ -111,8 +111,18 @@ def main() -> int:
     print(f"Episode {epsd}")
     print_policy(env, Pi)
 
-    # TODO : How to get the values from Q?
-    # print_values(env, V)
+    # Extract state value, V, from state-action value, Q.
+    V = {_s: 0.0 for _s in set(env.states)}
+    # Deterministic policy.
+    V.update({_s: Q[(_s, Pi[_s])] for _s in set(env.states) - set(env.terminal_states)})
+    # Stochastic policy.
+    # V.update(
+    #     {
+    #         _s: sum([Pi[(_s, _a)] * Q[(_s, _a)] for _a in ACTION_SPACE])
+    #         for _s in set(env.states) - set(env.terminal_states)
+    #     }
+    # )
+    print_values(env, V)
 
     return 0
 
