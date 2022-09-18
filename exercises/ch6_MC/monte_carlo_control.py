@@ -45,8 +45,9 @@ def main() -> int:
 
     # FIXME : `WindyGridWorldPenalised` gives strange values even with `penalty=0.0`,
     #       : for which the values should be the same as `WindyGridWorld`.
-    print(f"Penalty term: {PENALTY}")
-    env = WindyGridWorldPenalised(PENALTY, 3, 4, ACTIONS, REWARDS)
+    # print(f"Penalty term: {PENALTY}")
+    # env = WindyGridWorldPenalised(PENALTY, 3, 4, ACTIONS, REWARDS)
+    env = GridWorld(3, 4, ACTIONS, REWARDS)
 
     # NOTE : Often a random policy will not reach a terminal state.
     Pi = get_random_policy(env)
