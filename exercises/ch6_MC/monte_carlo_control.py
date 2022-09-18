@@ -8,6 +8,7 @@ import numpy as np
 from ..ch5_DP.grid_world import (
     ACTION_SPACE,
     ACTIONS,
+    ActionSpace,
     GridWorld,
     IntVec2d,
     REWARDS,
@@ -39,6 +40,28 @@ def get_random_state(env: GridWorld) -> IntVec2d:
     return random.choice(list(set(env.states) - set(env.terminal_states)))
 
 
+def play_episode(
+    env: GridWorld, policy: PolicyDict, state: IntVec2d, action: _t.Optional[IntVec2d]
+) -> _t.Tuple[_t.List[IntVec2d], _t.List[IntVec2d], _t.List[float], int]:
+    """Play one Monte Carlo episode."""
+    s: _t.List[IntVec2d] = [state if state else get_random_state(env)]
+    a: _t.List[IntVec2d] = [action if action else policy[s[0]]]
+    r: _t.List[float] = [0.0]
+
+    # For all steps after the first, choose the action from the policy.
+    step: int = 0
+    while step < MC_MAX_STEPS:
+        s2, _r = env.act(s[step], a[step])
+        s += [s2]
+        r += [_r]
+        step += 1
+        if s2 in env.terminal_states:
+            break
+        a += [policy[s[step]]]
+
+    return s, a, r, step
+
+
 def main() -> int:
 
     random.seed(MC_RANDOM_SEED)
@@ -61,27 +84,10 @@ def main() -> int:
 
     delta: _t.List[float] = []
     for epsd in range(1, MC_MAX_EPISODES + 1):
-        # Play Monte Carlo episode.
-        s: _t.List[IntVec2d] = [get_random_state(env)]
-        r: _t.List[float] = [0.0]
 
-        # Exploring starts method: begin with random state and action pair,
-        # (s0, a0) in order to fully explore.
-        a: _t.List[IntVec2d] = [random.choice(ACTION_SPACE)]
-        s2, _r = env.act(s[0], a[0])
-        s += [s2]
-        r += [_r]
-
-        # For all steps after the first, choose the action from the policy.
-        step: int = 1
-        while step < MC_MAX_STEPS:
-            if s2 in env.terminal_states:
-                break
-            a += [Pi[s[step]]]
-            s2, _r = env.act(s[step], a[step])
-            s += [s2]
-            r += [_r]
-            step += 1
+        s, a, r, step = play_episode(
+            env, Pi, state=get_random_state(env), action=random.choice(ACTION_SPACE)
+        )
 
         max_delta = 0.0
         sa_seq = list(zip(s[:step], a[:step]))
