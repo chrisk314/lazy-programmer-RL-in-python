@@ -41,7 +41,10 @@ def get_random_state(env: GridWorld) -> IntVec2d:
 
 
 def play_episode(
-    env: GridWorld, policy: PolicyDict, state: IntVec2d, action: _t.Optional[IntVec2d]
+    env: GridWorld,
+    policy: PolicyDict,
+    state: _t.Optional[IntVec2d] = None,
+    action: _t.Optional[IntVec2d] = None,
 ) -> _t.Tuple[_t.List[IntVec2d], _t.List[IntVec2d], _t.List[float], int]:
     """Play one Monte Carlo episode."""
     s: _t.List[IntVec2d] = [state if state else get_random_state(env)]
@@ -62,6 +65,47 @@ def play_episode(
     return s, a, r, step
 
 
+def improve_policy(
+    Pi: PolicyDict,
+    Q: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float],
+    sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int],
+    s: _t.List[IntVec2d],
+    a: _t.List[IntVec2d],
+    r: _t.List[float],
+    step: int,
+) -> _t.Tuple[
+    PolicyDict,
+    _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float],
+    _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int],
+    float,
+]:
+    """Improves policy."""
+    max_delta = 0.0
+    sa_seq = list(zip(s[:step], a[:step]))
+    # Update state values.
+    G: float = 0.0
+    while step > 0:
+        step -= 1
+        sa = sa_seq[step]
+        G = r[step + 1] + GAMMA * G
+        if not (MC_FIRST_VISIT and sa in set(sa_seq[:step])):
+            # Update estimate of Q
+            sa_cnt[sa] += 1
+            Q_prev = Q[sa]
+            Q[sa] = Q_prev + (G - Q_prev) / sa_cnt[sa]
+
+            # Update the policy with the argmax action over Q
+            Q_a = [Q[(s[step], _a)] for _a in ACTION_SPACE]
+            Q_a_max_idxs = np.argwhere(Q_a == np.max(Q_a))
+            Pi[s[step]] = ACTION_SPACE[random.choice(Q_a_max_idxs.flat)]
+
+            # Track biggest delta in Q for convergence check
+            if (_delta := abs(Q[sa] - Q_prev)) > max_delta:
+                max_delta = _delta
+
+    return Pi, Q, sa_cnt, max_delta
+
+
 def main() -> int:
 
     random.seed(MC_RANDOM_SEED)
@@ -80,41 +124,18 @@ def main() -> int:
     Q: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], float] = {
         (s, a): 0.0 for (s, a) in product(env.states, ACTION_SPACE)
     }
-    G_sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int] = defaultdict(lambda: 0)
-
+    sa_cnt: _t.Dict[_t.Tuple[IntVec2d, IntVec2d], int] = defaultdict(lambda: 0)
     delta: _t.List[float] = []
-    for epsd in range(1, MC_MAX_EPISODES + 1):
 
+    for epsd in range(1, MC_MAX_EPISODES + 1):
         s, a, r, step = play_episode(
             env, Pi, state=get_random_state(env), action=random.choice(ACTION_SPACE)
         )
-
-        max_delta = 0.0
-        sa_seq = list(zip(s[:step], a[:step]))
-        # Update state values.
-        G: float = 0.0
-        while step > 0:
-            step -= 1
-            sa = sa_seq[step]
-            G = r[step + 1] + GAMMA * G
-            if not (MC_FIRST_VISIT and sa in set(sa_seq[:step])):
-                # Update estimate of Q
-                G_sa_cnt[sa] += 1
-                Q_prev = Q[sa]
-                Q[sa] = Q_prev + (G - Q_prev) / G_sa_cnt[sa]
-
-                # Update the policy with the argmax action over Q
-                Q_a = [Q[(s[step], _a)] for _a in ACTION_SPACE]
-                Q_a_max_idxs = np.argwhere(Q_a == np.max(Q_a))
-                Pi[s[step]] = ACTION_SPACE[random.choice(Q_a_max_idxs.flat)]
-
-                # Track biggest delta in Q for convergence check
-                if (_delta := abs(Q[sa] - Q_prev)) > max_delta:
-                    max_delta = _delta
-
+        Pi, Q, sa_cnt, max_delta = improve_policy(Pi, Q, sa_cnt, s, a, r, step)
         delta += [max_delta]
         # print(f"Episode {epsd}")
         # print_values(env, V)
+
     print(f"Episode {epsd}")
     print_policy(env, Pi)
 
