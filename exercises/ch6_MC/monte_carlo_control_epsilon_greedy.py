@@ -6,6 +6,7 @@ import typing as _t
 
 import numpy as np
 from numpy import random as npr
+from .monte_carlo_control import plot_deltas, print_sample_counts
 from ..ch5_DP.grid_world import ACTION_SPACE, ACTIONS, GridWorld, IntVec2d, REWARDS
 from ..ch5_DP.iterative_policy_evaluation_deterministic import (
     print_policy,
@@ -175,7 +176,10 @@ def main() -> int:
             for _s in set(env.states) - set(env.terminal_states)
         }
     )
+
     print_values(env, V)
+    print_sample_counts(env, sa_cnt)
+    plot_deltas(delta)
 
     return 0
 

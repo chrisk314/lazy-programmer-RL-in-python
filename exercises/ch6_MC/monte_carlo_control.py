@@ -4,6 +4,7 @@ import random
 import sys
 import typing as _t
 
+from matplotlib import pyplot as plt
 import numpy as np
 from ..ch5_DP.grid_world import (
     ACTION_SPACE,
@@ -105,6 +106,23 @@ def improve_policy(
     return Pi, Q, sa_cnt, max_delta
 
 
+def print_sample_counts(env: GridWorld, counts: _t.Dict) -> None:
+    print("Sample counts:")
+    cnt_arr = np.zeros((env._rows, env._cols))
+    for i in range(env._rows):
+        for j in range(env._cols):
+            cnt_arr[i, j] = sum([counts.get(((i, j), a), 0.0) for a in ACTION_SPACE])
+    print(cnt_arr)
+
+
+def plot_deltas(delta: _t.List[float]) -> None:
+    """Plot max changes in Q against iterations."""
+    plt.plot(range(len(delta)), delta)
+    plt.xlabel("Iterations")
+    plt.ylabel("Delta")
+    plt.show()
+
+
 def main() -> int:
 
     random.seed(MC_RANDOM_SEED)
@@ -142,14 +160,10 @@ def main() -> int:
     V = {_s: 0.0 for _s in set(env.states)}
     # Deterministic policy.
     V.update({_s: Q[(_s, Pi[_s])] for _s in set(env.states) - set(env.terminal_states)})
-    # Stochastic policy.
-    # V.update(
-    #     {
-    #         _s: sum([Pi[(_s, _a)] * Q[(_s, _a)] for _a in ACTION_SPACE])
-    #         for _s in set(env.states) - set(env.terminal_states)
-    #     }
-    # )
+
     print_values(env, V)
+    print_sample_counts(env, sa_cnt)
+    plot_deltas(delta)
 
     return 0
 
