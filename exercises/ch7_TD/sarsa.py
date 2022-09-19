@@ -25,7 +25,7 @@ from ..ch6_MC.monte_carlo_control import plot_deltas, print_sample_counts
 
 ALPHA: float = 0.10
 GAMMA: float = 0.90
-EPSILON: float = 0.05
+EPSILON: float = 0.10
 MIN_ITERS: int = 1000
 
 
