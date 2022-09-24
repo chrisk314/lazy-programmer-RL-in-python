@@ -1,5 +1,3 @@
-from collections import defaultdict
-from itertools import product
 import random
 import sys
 import typing as _t
@@ -7,22 +5,9 @@ import typing as _t
 import numpy as np
 from numpy import random as npr
 from sklearn.kernel_approximation import RBFSampler
-from ..ch5_DP.grid_world import (
-    ACTION_SPACE,
-    ACTIONS,
-    GridWorld,
-    IntVec2d,
-    REWARDS,
-    WindyGridWorldPenalised,
-)
-from ..ch5_DP.iterative_policy_evaluation_deterministic import (
-    DELTA_CONV,
-    PolicyDict,
-    print_policy,
-    print_values,
-)
+from ..ch5_DP.grid_world import ACTION_SPACE, ACTIONS, GridWorld, IntVec2d, REWARDS
+from ..ch5_DP.iterative_policy_evaluation_deterministic import PolicyDict, print_values
 from ..ch6_MC.monte_carlo import get_policy_lazy_programmer
-from ..ch6_MC.monte_carlo_control import plot_deltas, print_sample_counts
 
 
 ALPHA: float = 0.10
