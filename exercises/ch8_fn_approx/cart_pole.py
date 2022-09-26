@@ -9,11 +9,6 @@ import numpy as np
 from numpy import random as npr
 from sklearn.kernel_approximation import RBFSampler
 from tqdm import tqdm
-from ..ch5_DP.iterative_policy_evaluation_deterministic import (
-    DELTA_CONV,
-    print_policy,
-    print_values,
-)
 
 
 ALPHA: float = 0.10  # Learning rate.
@@ -140,19 +135,6 @@ def main() -> int:
 
     env.close()
 
-    # # Obtain predicted value and greedy policy for each state.
-    # V, Pi = {}, {}
-    # for s in env.states:
-    #     if s in env.terminal_states:
-    #         V[s] = 0.0
-    #     else:
-    #         values = [model.predict([*s, a]) for a in ACTION_SPACE]
-    #         V[s] = np.max(values)
-    #         Pi[s] = ACTION_SPACE[np.argmax(values)]
-    # print_values(env, V)
-    # # TODO : How to improve exploration for infrequently visited states?
-    # print_sample_counts(env, sa_cnt)
-    # print_policy(env, Pi)
     return 0
 
 
