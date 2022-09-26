@@ -22,13 +22,13 @@ EPSILON: float = 0.05  # Exploration rate.
 MAX_ITERS: int = 1000
 
 
-def plot_mse(mse: _t.List[float]) -> None:
-    """Plot MSE against iterations."""
+def plot_arr_for_iters(y: _t.List[float], x_label: str = "Iterations", y_label: str = "y") -> None:
+    """Plot `y` against iterations."""
     from matplotlib import pyplot as plt
 
-    plt.plot(range(len(mse)), mse)
-    plt.xlabel("Iterations")
-    plt.ylabel("MSE")
+    plt.plot(range(len(y)), y)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.show()
 
 
@@ -132,11 +132,14 @@ def main() -> int:
             # Exit early if agent got max reward for last 20 iters.
             break
 
-    plot_mse(mse)
-
-    watch_agent(model)  # Observe performance of agent after training
+    plot_arr_for_iters(mse, y_label="MSE")
+    plot_arr_for_iters(r_epsd_all, y_label="Rewards")
+    # Observe performance of agent after training.
+    # NOTE : Epsilon is set to 0.0 to observe the greedy behaviour.
+    watch_agent(model, eps=0.0)
 
     env.close()
+
     # # Obtain predicted value and greedy policy for each state.
     # V, Pi = {}, {}
     # for s in env.states:
