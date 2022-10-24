@@ -1,5 +1,7 @@
+click
 gym[classic_control]
 matplotlib
 nptyping
 numpy
+pandas
 sklearn
