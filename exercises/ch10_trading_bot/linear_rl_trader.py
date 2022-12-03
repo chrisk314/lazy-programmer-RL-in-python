@@ -8,7 +8,6 @@ import typing as _t
 
 import click
 from gym import Env
-from matplotlib import pyplot as plt
 import numpy as np
 from numpy import random as npr
 import pandas as pd
@@ -258,10 +257,6 @@ def main(train: bool) -> int:
         agent.save(models_dir / "linear.npz")
         with (models_dir / "scaler.pkl").open("wb") as f:
             pickle.dump(scaler, f)
-
-        # Plot the agent performance
-        plt.plot(agent.model.losses)
-        plt.show()
 
     np.save(rewards_dir / ("train.npy" if train else "test.npy"), portfolio_value)
 
