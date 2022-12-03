@@ -23,7 +23,7 @@ INITIAL_INVESTMENT = 10000
 
 
 class HistoricMultiStockEnv(Env):
-    """Environment for RL agent trading 3 stocks.
+    """Environment for RL agent trading multiple stocks.
 
     Implements the gym.Env interface.
 
