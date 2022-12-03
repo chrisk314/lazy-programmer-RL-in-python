@@ -144,9 +144,9 @@ class DQNAgent:
         state_size: int,
         action_size: int,
         gamma: float = 0.95,
-        eps: float = 0.1,
+        eps: float = 1.0,
         eps_min: float = 0.01,
-        eps_decay: float = 0.99,
+        eps_decay: float = 0.995,
     ) -> None:
         self.state_size = state_size
         self.action_size = action_size
@@ -159,9 +159,8 @@ class DQNAgent:
     def act(self, state: np.ndarray) -> int:
         if npr.random() <= self.eps:
             return npr.choice(self.action_size)
-        else:
-            action_values = self.model.predict(state)
-            return np.argmax(action_values[0])
+        action_values = self.model.predict(state)
+        return np.argmax(action_values[0])
 
     def train(
         self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, done: bool
@@ -176,10 +175,10 @@ class DQNAgent:
             self.eps *= self.eps_decay
 
     def load(self, path: Path) -> None:
-        self.model.load_weights(path)
+        self.model.load_weights(str(path))
 
     def save(self, path: Path) -> None:
-        self.model.save_weights(path)
+        self.model.save_weights(str(path))
 
 
 def play_episode(
