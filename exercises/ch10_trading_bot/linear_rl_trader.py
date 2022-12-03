@@ -88,7 +88,7 @@ class HistoricMultiStockEnv(Env):
         v_cur = self._get_value()
         # Reward is equal to change in the portfolio value
         r = v_cur - v_prev
-        done = self.cur_step == self.n_steps - 1
+        done = self.cur_step == self.n_steps - 1 or v_cur == 0
         trunc = False  # Indicates if episode has been truncated
         info = {"cur_val": v_cur}
         return self._get_obs(), r, done, trunc, info
@@ -203,10 +203,10 @@ def load_training_data(fname: str = TRAIN_CSV) -> np.ndarray:
     return np.loadtxt(f"./data/{fname}", delimiter=",", skiprows=1)
 
 
-def get_state_scaler(env: Env, n_epsd: int = SAMPLE_EPISODES) -> StandardScaler:
+def get_state_scaler(env: Env) -> StandardScaler:
     """Returns scaler fit to sample from the state space."""
     samples = []
-    for _ in tqdm(range(n_epsd)):
+    for _ in tqdm(range(env.n_steps)):
         s, _ = env.reset()
         samples += [s]
         done = False
