@@ -13,6 +13,7 @@ import numpy as np
 from numpy import random as npr
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from tqdm import tqdm
 
 
 TRAIN_CSV: str = "aapl_msi_sbux.csv"  # Training data of stock daily prices.
@@ -206,7 +207,7 @@ def load_training_data(fname: str = TRAIN_CSV) -> np.ndarray:
 def get_state_scaler(env: Env, n_epsd: int = SAMPLE_EPISODES) -> StandardScaler:
     """Returns scaler fit to sample from the state space."""
     samples = []
-    for _ in range(n_epsd):
+    for _ in tqdm(range(n_epsd)):
         s, _ = env.reset()
         samples += [s]
         done = False
@@ -249,7 +250,7 @@ def main(train: bool) -> int:
             scaler = pickle.load(f)
 
     portfolio_value = []
-    for _ in range(n_episodes):
+    for _ in tqdm(range(n_episodes)):
         info = play_episode(agent, env, scaler, is_train=train)
         portfolio_value += [info["cur_val"]]
 
