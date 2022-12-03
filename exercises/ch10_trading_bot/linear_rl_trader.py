@@ -69,7 +69,7 @@ class HistoricMultiStockEnv(Env):
         to_buy: _t.List = []
         for stock in range(self.n_stocks):
             if action_vec[stock] == 0:
-                self.cash = self.stock_owned[stock] * self.stock_price[stock]
+                self.cash += self.stock_owned[stock] * self.stock_price[stock]
                 self.stock_owned[stock] = 0
             elif action_vec[stock] == 1:
                 to_buy += [stock]
