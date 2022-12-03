@@ -122,7 +122,7 @@ class LinearModel:
         self.vW = mom * self.vW - lr * gW  # Update momentum for weights.
         self.vb = mom * self.vb - lr * gb  # Update momentum for biases.
         self.W += self.vW
-        self.b + +self.vb
+        self.b += self.vb
         self.losses += [np.mean(Y_err**2)]  # Track MSE.
 
     def load_weights(self, path: str) -> None:
