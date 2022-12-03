@@ -257,7 +257,7 @@ def main(train: bool) -> int:
     if train:
         # Running in train mode so save the `agent` and `scaler`.
         agent.save(models_dir / "linear.npz")
-        with (models_dir / "scaler.pkl").open("rb") as f:
+        with (models_dir / "scaler.pkl").open("wb") as f:
             pickle.dump(scaler, f)
 
         # Plot the agent performance
