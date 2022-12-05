@@ -4,4 +4,4 @@ matplotlib
 nptyping
 numpy
 pandas
-sklearn
+scikit-learn
