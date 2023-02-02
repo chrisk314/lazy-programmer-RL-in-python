@@ -113,7 +113,7 @@
             "name": "rl2-ch3-cart-pole-bins",
             "type": "python",
             "request": "launch",
-            "program": "rl2/exercises/ch3_basic_RL/ex1/cart_pole_bins.py",
+            "program": "rl2/exercises/ch3_basic_RL/cart_pole_bins.py",
             "console": "integratedTerminal",
             "justMyCode": false,
         },
