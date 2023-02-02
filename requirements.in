@@ -5,3 +5,9 @@ nptyping
 numpy
 pandas
 scikit-learn
+tensorflow
+tqdm
+# For torch installation without CUDA use `--extra-index-url https://download.pytorch.org/whl/cpu`
+# torch
+# torchaudio
+# torchvision
