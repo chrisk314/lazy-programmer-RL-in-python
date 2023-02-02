@@ -109,5 +109,21 @@
                 "--train",
             ],
         },
+        {
+            "name": "rl2-ch3-cart-pole-bins",
+            "type": "python",
+            "request": "launch",
+            "program": "rl2/exercises/ch3_basic_RL/ex1/cart_pole_bins.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "lp-rl2-ch3-cart-pole-bins",
+            "type": "python",
+            "request": "launch",
+            "program": "../lazyprogrammer_machine_learning_examples/rl2/cartpole/q_learning_bins.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
     ]
 }
