@@ -55,7 +55,10 @@ class FeatureTransformer:
                 ("rbf4", RBFSampler(gamma=0.5, n_components=n_components)),
             ]
         )
-        self.featurizer.fit(self.scaler.transform(state_samples))
+
+        # TODO : Seems liks a hack to get dimensions. Is there a better way?
+        examples = self.featurizer.fit_transform(self.scaler.transform(state_samples))
+        self.dimensions = examples.shape[1]
 
     def transform(self, obs: np.ndarray) -> int:
         scaled_obs = self.scaler.transform(obs)
