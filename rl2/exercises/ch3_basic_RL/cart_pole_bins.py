@@ -1,6 +1,6 @@
-"""This script contains trains and runs an RL agent to solve the cart pole
-control problem. The state and action space is treated as continuous split
-into bins.
+"""This script trains and runs an RL agent to solve the cart pole control problem.
+
+The state and action space is treated as continuous split into bins.
 """
 
 import sys
