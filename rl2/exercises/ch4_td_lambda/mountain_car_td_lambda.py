@@ -27,6 +27,7 @@ from ..ch3_basic_RL.mountain_car_rbf import (
 )
 
 
+# See D. Silver RL lectures Lecture 6: Value Function Approximation for comparison of different lambdas
 LAMBDA: float = 0.7
 
 
@@ -71,7 +72,7 @@ class Model:
         X = self._trans.transform([s])
         # Discount the old eligibility values
         self.eligibilities *= gamma * _lambda
-        # TODO : Why is transformed state used as grad of value function in eligibility update?
+        # See D. Silver RL lectures Lecture 6: Value Function Approximation for update explanation
         self.eligibilities[a] += X[0]
         self.models[a].partial_fit(X[0], G, self.eligibilities[a], learning_rate=learning_rate)
 
