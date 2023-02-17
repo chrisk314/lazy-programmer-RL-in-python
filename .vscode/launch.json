@@ -165,5 +165,13 @@
             "console": "integratedTerminal",
             "justMyCode": false,
         },
+        {
+            "name": "rl2-ch4-mountain-car-td-lambda",
+            "type": "python",
+            "request": "launch",
+            "module": "rl2.exercises.ch4_td_lambda.mountain_car_td_lambda",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
     ]
 }
