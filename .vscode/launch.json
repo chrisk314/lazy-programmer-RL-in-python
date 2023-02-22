@@ -173,5 +173,13 @@
             "console": "integratedTerminal",
             "justMyCode": false,
         },
+        {
+            "name": "rl2-ch5-cart-pole-tf-pg",
+            "type": "python",
+            "request": "launch",
+            "module": "rl2.exercises.ch5_policy_gradient.cart_pole_tf_pg",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
     ]
 }
