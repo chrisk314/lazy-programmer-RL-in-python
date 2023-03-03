@@ -21,14 +21,12 @@ NUM_EPISODES: int = 1000
 CART_POLE_MAX_ITERS: int = 199
 
 
-class PolicyModel(tf.keras.Sequential):
+class PolicyModel(tf.keras.Model):
     def __init__(
         self, d_in: int, d_out: int, layer_sizes: _t.List[int], learning_rate: float = ALPHA
     ) -> None:
         super().__init__()
-        # TODO : Is Input layer necessary with class API?
-        # self._layers: _t.List[tf.keras.Layer] = []
-        self._layers: _t.List[tf.keras.Layer] = [tf.keras.layers.Input(shape=(d_in,))]
+        self._layers: _t.List[tf.keras.Layer] = []
         for d in layer_sizes:
             self._layers += [tf.keras.layers.Dense(d, activation=tf.nn.tanh)]
         self._layers += [tf.keras.layers.Dense(d_out, activation=tf.nn.softmax, use_bias=False)]
@@ -36,37 +34,40 @@ class PolicyModel(tf.keras.Sequential):
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
     def call(self, x: np.ndarray) -> np.ndarray:
-        _x = x
+        _x = np.atleast_2d(x)
         for l in self._layers:
             _x = l(_x)
         return _x
 
     def sample_action(self, x: np.ndarray) -> int:
-        _x = np.atleast_2d(x)  # TODO : Is this reshaping necessary?
-        p = self(_x, training=False)[0]
-        return np.random.choice(len(p), p=p)
+        p = self(x, training=False)[0]
+        return np.random.choice(len(p), p=p.numpy())
 
     def partial_fit(self, X, actions, advantages):
         # TODO : Can operations within the tape be recorded in vectorised form?
         #      : Or, should they take place sequentially, i.e. in a for loop over time steps?
         with tf.GradientTape() as tape:
-            action_probs = self(X)  # TODO : These could have been saved during MC run...
-            action_probs_sel = action_probs[np.arange(len(actions)), actions]
-            log_action_probs_sel = np.log(action_probs_sel)
-            actor_losses = log_action_probs_sel * advantages
-            loss = np.sum(actor_losses)
+            #     action_probs = self(X)  # TODO : These could have been saved during MC run...
+            #     # TODO : This valid numpy indexing doesn't work in TensorFlow. How to best vectorise the for loop and does it matter?
+            #     action_probs_sel = action_probs[np.arange(len(actions)), actions]
+            #     log_action_probs_sel = np.log(action_probs_sel)
+            #     actor_losses = log_action_probs_sel * advantages
+            #     loss = np.sum(actor_losses)
+            losses = []
+            action_probs = self(X)
+            for ap, a, adv in zip(action_probs, actions, advantages):
+                losses += [-tf.math.log(ap[a]) * adv]
+            loss = tf.reduce_sum(losses)
         gradients = tape.gradient(loss, self.trainable_variables)
         self.opt.apply_gradients(zip(gradients, self.trainable_variables))
 
 
-class ValueModel(tf.keras.Sequential):
+class ValueModel(tf.keras.Model):
     def __init__(
         self, d_in: int, d_out: int, layer_sizes: _t.List[int], learning_rate: float = ALPHA
     ) -> None:
         super().__init__()
-        # TODO : Is Input layer necessary with class API?
-        # self._layers: _t.List[tf.keras.Layer] = []
-        self._layers: _t.List[tf.keras.Layer] = [tf.keras.layers.Input(shape=(d_in,))]
+        self._layers: _t.List[tf.keras.Layer] = []
         for d in layer_sizes:
             self._layers += [tf.keras.layers.Dense(d, activation=tf.nn.tanh)]
         self._layers += [tf.keras.layers.Dense(d_out, activation=tf.nn.softmax, use_bias=False)]
@@ -74,7 +75,7 @@ class ValueModel(tf.keras.Sequential):
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
     def call(self, x: np.ndarray) -> np.ndarray:
-        _x = x
+        _x = np.atleast_2d(x)
         for l in self._layers:
             _x = l(_x)
         return _x
@@ -84,7 +85,7 @@ class ValueModel(tf.keras.Sequential):
         #      : Or, should they take place sequentially, i.e. in a for loop over time steps?
         with tf.GradientTape() as tape:
             values = self(X)  # TODO : These could have been saved during MC run...
-            loss = np.sum((Y - values) ** 2)
+            loss = tf.reduce_sum((Y - values) ** 2)
         gradients = tape.gradient(loss, self.trainable_variables)
         self.opt.apply_gradients(zip(gradients, self.trainable_variables))
 
@@ -148,9 +149,9 @@ def play_one_episode(
     **kwargs: _t.Any,
 ) -> float:
     if method == "MC":
-        play_one_episode_mc(*args, **kwargs)
+        return play_one_episode_mc(*args, **kwargs)
     elif method == "TD":
-        play_one_episode_td(*args, **kwargs)
+        return play_one_episode_td(*args, **kwargs)
     else:
         raise ValueError(f"Unrecognised method: {method}.")
 
