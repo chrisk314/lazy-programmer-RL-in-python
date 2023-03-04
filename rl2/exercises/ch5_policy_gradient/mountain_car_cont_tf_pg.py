@@ -16,8 +16,11 @@ from ..ch3_basic_RL.cart_pole_bins import plot_running_average, plot_total_rewar
 
 ALPHA: float = 1.0e-3  # Learning rate.
 GAMMA: float = 0.99  # Discount factor.
-MAX_ITERS: int = 2000
+MAX_ITERS: int = 1000
 NUM_EPISODES: int = 1000
+
+# See D. Silver RL lectures Lecture 6: Value Function Approximation for comparison of different lambdas
+LAMBDA: float = 0.7
 
 
 class PolicyModel(tf.keras.Model):
@@ -33,6 +36,9 @@ class PolicyModel(tf.keras.Model):
         self._stdv_layer = tf.keras.layers.Dense(1, activation=tf.nn.softplus, use_bias=False)
 
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
+
+        # TODO : Get eligibility vector size from Tensorflow API?
+        self.eligibility = None
 
     def call(self, x: np.ndarray) -> np.ndarray:
         _x = np.atleast_2d(x)
@@ -51,7 +57,14 @@ class PolicyModel(tf.keras.Model):
             [np.clip(np.random.normal(loc=m, scale=s), -1.0, 1.0) for m, s in zip(mean, stdv)]
         )
 
-    def partial_fit(self, X, actions, advantages):
+    def partial_fit(
+        self,
+        X,
+        actions,
+        advantages,
+        gamma: float = GAMMA,
+        _lambda: float = LAMBDA,
+    ):
         # TODO : Can operations within the tape be recorded in vectorised form?
         #      : Or, should they take place sequentially, i.e. in a for loop over time steps?
         with tf.GradientTape() as tape:
@@ -62,7 +75,11 @@ class PolicyModel(tf.keras.Model):
                 losses += [-tf.math.log(p_a) * adv]
             loss = tf.reduce_sum(losses)
         gradients = tape.gradient(loss, self.trainable_variables)
-        self.opt.apply_gradients(zip(gradients, self.trainable_variables))
+        self.eligibility = [
+            gamma * _lambda * e + g
+            for e, g in zip((self.eligibility or np.zeros(len(gradients))), gradients)
+        ]
+        self.opt.apply_gradients(zip(self.eligibility, self.trainable_variables))
 
 
 class ValueModel(tf.keras.Model):
@@ -77,24 +94,60 @@ class ValueModel(tf.keras.Model):
 
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
+        # TODO : Get eligibility vector size from Tensorflow API?
+        self.eligibility = None
+
     def call(self, x: np.ndarray) -> np.ndarray:
         _x = np.atleast_2d(x)
         for l in self._layers:
             _x = l(_x)
         return _x
 
-    def partial_fit(self, X, Y):
+    def partial_fit(
+        self,
+        X,
+        Y,
+        gamma: float = GAMMA,
+        _lambda: float = LAMBDA,
+    ):
         # TODO : Can operations within the tape be recorded in vectorised form?
         #      : Or, should they take place sequentially, i.e. in a for loop over time steps?
         with tf.GradientTape() as tape:
             values = self(X)  # TODO : These could have been saved during MC run...
             loss = tf.reduce_sum((Y - values) ** 2)
         gradients = tape.gradient(loss, self.trainable_variables)
-        self.opt.apply_gradients(zip(gradients, self.trainable_variables))
+        self.eligibility = [
+            gamma * _lambda * e + g
+            for e, g in zip((self.eligibility or np.zeros(len(gradients))), gradients)
+        ]
+        self.opt.apply_gradients(zip(self.eligibility, self.trainable_variables))
 
 
-def play_one_episode_td(pi: PolicyModel, v: ValueModel, env: Env, gamma: float = GAMMA) -> float:
-    return NotImplemented
+def play_one_episode_td(
+    pi: PolicyModel, v: ValueModel, env: Env, gamma: float = GAMMA, _lambda: float = LAMBDA
+) -> float:
+    s, _ = env.reset()
+    done = False
+    iters = 0
+    total_reward = 0.0
+
+    while not done and iters < MAX_ITERS:
+        # Choose action and take a step
+        a = pi.sample_action(s)[0]
+        s2, r, done, _, _ = env.step(a)
+
+        # Update the model with N-steps of data
+        G = r + gamma * v(s2)[0]
+        adv = G - v(s)[0]
+        pi.partial_fit(s, a, adv, gamma=gamma, _lambda=_lambda)
+        v.partial_fit(s, G, gamma=gamma, _lambda=_lambda)
+
+        # Update iteration vars
+        s = s2
+        total_reward += r
+        iters += 1
+
+    return total_reward
 
 
 def play_one_episode_mc(pi: PolicyModel, v: ValueModel, env: Env, gamma: float = GAMMA) -> float:
@@ -168,7 +221,7 @@ def main() -> int:
     # Train agent.
     total_rewards = []
     for n in tqdm(range(NUM_EPISODES)):
-        total_rewards += [play_one_episode(pi, v, env, method="MC")]
+        total_rewards += [play_one_episode(pi, v, env, method="TD")]
         if n % 100 == 0:
             print(f"Episode {n}: total reward: {total_rewards[-1]}.")
 
