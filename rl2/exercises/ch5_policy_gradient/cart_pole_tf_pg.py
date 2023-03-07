@@ -70,7 +70,7 @@ class ValueModel(tf.keras.Model):
         self._layers: _t.List[tf.keras.Layer] = []
         for d in layer_sizes:
             self._layers += [tf.keras.layers.Dense(d, activation=tf.nn.tanh)]
-        self._layers += [tf.keras.layers.Dense(d_out, activation=tf.nn.softmax, use_bias=False)]
+        self._layers += [tf.keras.layers.Dense(d_out)]
 
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
