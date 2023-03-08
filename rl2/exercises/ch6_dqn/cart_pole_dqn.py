@@ -79,10 +79,10 @@ class DQN(tf.keras.Model):
         batch = [
             buffer[i] for i in np.random.choice(len(buffer), size=MINI_BATCH_SIZE, replace=False)
         ]
-        s, a, r, s2 = zip(*batch)
+        s, a, r, s2, done = zip(*batch)
 
         # Calculate stable returns from target network.
-        G = r + gamma * np.max(Q_t(s2), axis=1)
+        G = r + np.where(~np.array(done), gamma * np.max(Q_t(s2), axis=1), 0.0)
 
         # Train the model on the batch.
         self.partial_fit(s, a, G)
@@ -123,7 +123,7 @@ def play_one_episode_td(
             r = -200
 
         # Add the experience to the replay buffer
-        buffer.append((s, a, r, s2))
+        buffer.append((s, a, r, s2, done))
 
         # Train the agent from the experience buffer
         Q.train_from_buffer(buffer, Q_t, gamma=gamma)
