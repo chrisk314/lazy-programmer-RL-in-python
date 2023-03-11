@@ -140,19 +140,6 @@ def play_one_episode_td(
     return total_reward
 
 
-def play_one_episode(
-    *args: _t.Any,
-    method: str = "TD",
-    **kwargs: _t.Any,
-) -> float:
-    if method == "TD":
-        return play_one_episode_td(*args, **kwargs)
-    # elif method == "MC":
-    #     return play_one_episode_mc(*args, **kwargs)
-    else:
-        raise ValueError(f"Unrecognised method: {method}.")
-
-
 def main() -> int:
     # Set up environment and agent.
     env = make("CartPole-v0")
@@ -170,7 +157,7 @@ def main() -> int:
     total_rewards = []
     for n in tqdm(range(NUM_EPISODES)):
         eps = 1.0 / np.sqrt(n + 1)
-        total_rewards += [play_one_episode(Q, Q_t, env, buffer, method="TD", eps=eps)]
+        total_rewards += [play_one_episode_td(Q, Q_t, env, buffer, method="TD", eps=eps)]
         if n == 0 or (n + 1) % 100 == 0:
             print(f"Episode {n}: total reward: {total_rewards[-1]}.")
             # Q.save("cart-pole-dqn.tf")
