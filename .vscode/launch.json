@@ -181,5 +181,37 @@
             "console": "integratedTerminal",
             "justMyCode": false,
         },
+        {
+            "name": "rl2-ch5-mountain-car-cont-tf-pg",
+            "type": "python",
+            "request": "launch",
+            "module": "rl2.exercises.ch5_policy_gradient.mountain_car_cont_tf_pg",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "rl2-ch6-cart-pole-dqn",
+            "type": "python",
+            "request": "launch",
+            "module": "rl2.exercises.ch6_dqn.cart_pole_dqn",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "lp-rl2-ch6-cart-pole-dqn-tf",
+            "type": "python",
+            "request": "launch",
+            "program": "../lazyprogrammer_machine_learning_examples/rl2/cartpole/dqn_tf.py",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "rl2-ch6-breakout-dqn",
+            "type": "python",
+            "request": "launch",
+            "module": "rl2.exercises.ch6_dqn.breakout_dqn",
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
     ]
 }
