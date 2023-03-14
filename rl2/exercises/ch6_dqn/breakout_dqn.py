@@ -84,8 +84,7 @@ class DQN(tf.keras.Model):
     def sample_action(self, s: int, eps: float = EPSILON) -> int:
         if np.random.random() < eps:
             return np.random.choice(self._n_actions)
-        _s = np.atleast_2d(s)
-        return np.argmax(self(_s)[0])
+        return np.argmax(self(s)[0])
 
     def partial_fit(self, X, actions, Y):
         with tf.GradientTape() as tape:
