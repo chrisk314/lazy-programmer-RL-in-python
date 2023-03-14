@@ -133,6 +133,9 @@ class ReplayBuffer:
         self._data: _t.Deque = deque(maxlen=maxlen)
         self._done_idx: _t.Set = set()
 
+    def __len__(self) -> int:
+        return len(self._data)
+
     def append(self, item: _t.Tuple[_t.Any, ...]) -> None:
         """Adds (s0, a, r, s1, done) tuple to the buffer."""
         _len = len(self._data)
