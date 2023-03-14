@@ -72,6 +72,7 @@ class DQN(tf.keras.Model):
             self._layers += [tf.keras.layers.Dense(d)]
         self._layers += [tf.keras.layers.Dense(d_out)]
 
+        # Configure optimiser
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
     def call(self, x: np.ndarray) -> np.ndarray:
@@ -189,6 +190,7 @@ class ImageTransformer:
         _image = tf.image.rgb_to_grayscale(image)
         _image = tf.image.crop_to_bounding_box(_image, *self._bounding_box)
         _image = tf.image.resize(_image, self._size, method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+        _image = _image / 255  # Convert to values in [0.0, 1.0]
         _image = tf.squeeze(_image)
         return _image
 
