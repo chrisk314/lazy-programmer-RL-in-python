@@ -54,9 +54,6 @@ class DQN(tf.keras.Model):
         self._n_actions = d_out
 
         # Compose NN with conv and hidden layers
-        # self._layers: _t.List[tf.keras.Layer] = [
-        #     tf.keras.layers.Input(shape=(FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
-        # ]
         self._layers: _t.List[tf.keras.Layer] = []
         for filters, kernel_size, pool_size in conv_layer_sizes:
             self._layers += [
