@@ -1,5 +1,5 @@
 click
-gym[classic_control]
+gym[classic_control,atari,accept-rom-license]
 matplotlib
 nptyping
 numpy
