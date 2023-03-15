@@ -54,9 +54,6 @@ class DQN(tf.keras.Model):
         self._n_actions = d_out
 
         # Compose NN with conv and hidden layers
-        # self._layers: _t.List[tf.keras.Layer] = [
-        #     tf.keras.layers.Input(shape=(None, FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
-        # ]
         self._layers: _t.List[tf.keras.Layer] = []
         for filters, kernel_size, pool_size in conv_layer_sizes:
             self._layers += [
@@ -78,7 +75,6 @@ class DQN(tf.keras.Model):
         self.build((None, FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
 
     def call(self, x: np.ndarray) -> np.ndarray:
-        # _x = np.array(x, ndmin=4)  # "atleast_4d"
         _x = x
         for l in self._layers:
             _x = l(_x)
@@ -238,13 +234,6 @@ def play_one_episode_td(
 
     # At episode start, fill the frame stack with duplicated initial frame.
     s = AgentState(img_trans, s_raw)
-
-    # TODO : Figure out the proper way to initialise the state of `DQN` and avoid the error message below.
-    # ValueError: You called `set_weights(weights)` on layer "dqn_1" with a weight list of length 6, but the layer was expecting 0 weights
-    # tf.keras.Model.build looks like an option but this fails when creating numpy and tf array from tf placeholder array.
-    # if GLOBAL_ITERS == 0:
-    #     Q(s.state)  # Call `DQN` to initialise state... there must be a better way...
-    #     Q_t(s.state)  # Call `DQN` to initialise state... there must be a better way...
 
     while not done and iters < MAX_ITERS:
         # Choose action using Q network and take a step
