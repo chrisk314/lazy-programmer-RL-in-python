@@ -232,9 +232,10 @@ def play_one_episode_td(
     # At episode start, fill the frame stack with duplicated initial frame.
     s = AgentState(img_trans, s_raw)
 
-    # TODO : Figure out the proper way to initialise the state of `Q_t` and avoid the error message below.
+    # TODO : Figure out the proper way to initialise the state of `DQN` and avoid the error message below.
     # ValueError: You called `set_weights(weights)` on layer "dqn_1" with a weight list of length 6, but the layer was expecting 0 weights
     if GLOBAL_ITERS == 0:
+        Q(s.state)  # Call `Q_t` to initialise state... there must be a better way...
         Q_t(s.state)  # Call `Q_t` to initialise state... there must be a better way...
 
     while not done and iters < MAX_ITERS:
