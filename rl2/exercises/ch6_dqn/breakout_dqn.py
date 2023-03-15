@@ -167,9 +167,9 @@ class ReplayBuffer:
         # TODO : Better way to build the batch array?
         batch = [
             (
-                np.array([self._data[i - j][0] for j in range(1 - self._stack_size, 1)]),
+                np.array([self._data[i + j][0] for j in range(1 - self._stack_size, 1)]),
                 *self._data[i][1:3],
-                np.array([self._data[i - j][3] for j in range(1 - self._stack_size, 1)]),
+                np.array([self._data[i + j][3] for j in range(1 - self._stack_size, 1)]),
                 self._data[i][4],
             )
             for i in sample_idxs
