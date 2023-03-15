@@ -54,6 +54,9 @@ class DQN(tf.keras.Model):
         self._n_actions = d_out
 
         # Compose NN with conv and hidden layers
+        # self._layers: _t.List[tf.keras.Layer] = [
+        #     tf.keras.layers.Input(shape=(None, FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
+        # ]
         self._layers: _t.List[tf.keras.Layer] = []
         for filters, kernel_size, pool_size in conv_layer_sizes:
             self._layers += [
@@ -72,8 +75,11 @@ class DQN(tf.keras.Model):
         # Configure optimiser
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
+        self.build((None, FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
+
     def call(self, x: np.ndarray) -> np.ndarray:
-        _x = np.array(x, ndmin=4)  # "atleast_4d"
+        # _x = np.array(x, ndmin=4)  # "atleast_4d"
+        _x = x
         for l in self._layers:
             _x = l(_x)
         return _x
@@ -206,7 +212,7 @@ class AgentState:
 
     @property
     def state(self) -> np.ndarray:
-        return np.array(self.frames)
+        return np.array(self.frames, ndmin=4)
 
     def append(self, s: _t.Any):
         _s = self._transformer.transform(s)
@@ -234,9 +240,10 @@ def play_one_episode_td(
 
     # TODO : Figure out the proper way to initialise the state of `DQN` and avoid the error message below.
     # ValueError: You called `set_weights(weights)` on layer "dqn_1" with a weight list of length 6, but the layer was expecting 0 weights
-    if GLOBAL_ITERS == 0:
-        Q(s.state)  # Call `Q_t` to initialise state... there must be a better way...
-        Q_t(s.state)  # Call `Q_t` to initialise state... there must be a better way...
+    # tf.keras.Model.build looks like an option but this fails when creating numpy and tf array from tf placeholder array.
+    # if GLOBAL_ITERS == 0:
+    #     Q(s.state)  # Call `DQN` to initialise state... there must be a better way...
+    #     Q_t(s.state)  # Call `DQN` to initialise state... there must be a better way...
 
     while not done and iters < MAX_ITERS:
         # Choose action using Q network and take a step
@@ -290,7 +297,8 @@ def main() -> int:
         total_rewards += [play_one_episode_td(Q, Q_t, env, buffer, img_trans, gamma=GAMMA, eps=eps)]
         if n == 0 or (n + 1) % 100 == 0:
             print(f"Episode {n}: total reward: {total_rewards[-1]}.")
-            Q.save("breakout-dqn.tf")
+            if n > 0:
+                Q.save("breakout-dqn.tf")
 
     # Plot results.
     plot_total_rewards(total_rewards)
