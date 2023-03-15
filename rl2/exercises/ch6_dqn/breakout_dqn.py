@@ -106,6 +106,7 @@ class DQN(tf.keras.Model):
         # Sample a random batch without replacement.
         batch = buffer.sample()
         s, a, r, s2, done = zip(*batch)
+        s, s2 = np.array(s), np.array(s2)
 
         # Calculate stable returns from target network.
         G = r + np.where(~np.array(done), gamma * np.max(Q_t(s2), axis=1), 0.0)
