@@ -39,6 +39,10 @@ BREAKOUT_BOUNDING_BOX: _t.List[int] = (34, 0, 160, 160)
 GLOBAL_ITERS: int = 0
 
 
+# TODO : Refactor DQN and data handling to work with data in "NHWC"
+#      : (num_samples, height, width, channels) format as this is the only
+#      : supported format on CPU. Solves below error:
+#      : Default MaxPoolingGradOp only supports NHWC on device type CPU
 class DQN(tf.keras.Model):
     """`DQN` is a Deep Q Network for approximating the action-value function."""
 
