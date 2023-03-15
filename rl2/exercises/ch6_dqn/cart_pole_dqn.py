@@ -157,7 +157,7 @@ def main() -> int:
     total_rewards = []
     for n in tqdm(range(NUM_EPISODES)):
         eps = 1.0 / np.sqrt(n + 1)
-        total_rewards += [play_one_episode_td(Q, Q_t, env, buffer, method="TD", eps=eps)]
+        total_rewards += [play_one_episode_td(Q, Q_t, env, buffer, eps=eps)]
         if n == 0 or (n + 1) % 100 == 0:
             print(f"Episode {n}: total reward: {total_rewards[-1]}.")
             # Q.save("cart-pole-dqn.tf")
