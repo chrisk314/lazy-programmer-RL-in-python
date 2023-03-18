@@ -39,10 +39,6 @@ BREAKOUT_BOUNDING_BOX: _t.List[int] = (34, 0, 160, 160)
 GLOBAL_ITERS: int = 0
 
 
-# TODO : Refactor DQN and data handling to work with data in "NHWC"
-#      : (num_samples, height, width, channels) format as this is the only
-#      : supported format on CPU. Solves below error:
-#      : Default MaxPoolingGradOp only supports NHWC on device type CPU
 class DQN(tf.keras.Model):
     """`DQN` is a Deep Q Network for approximating the action-value function."""
 
@@ -60,15 +56,9 @@ class DQN(tf.keras.Model):
         # Compose NN with conv and hidden layers
         self._layers: _t.List[tf.keras.Layer] = []
         for filters, kernel_size, pool_size in conv_layer_sizes:
-            self._layers += [
-                tf.keras.layers.Conv2D(
-                    filters, kernel_size, activation=tf.nn.relu, data_format="channels_first"
-                )
-            ]
-            self._layers += [
-                tf.keras.layers.MaxPooling2D(pool_size=pool_size, data_format="channels_first")
-            ]
-        self._layers += [tf.keras.layers.Flatten(data_format="channels_first")]
+            self._layers += [tf.keras.layers.Conv2D(filters, kernel_size, activation=tf.nn.relu)]
+            self._layers += [tf.keras.layers.MaxPooling2D(pool_size=pool_size)]
+        self._layers += [tf.keras.layers.Flatten()]
         for d in hidden_layer_sizes:
             self._layers += [tf.keras.layers.Dense(d)]
         self._layers += [tf.keras.layers.Dense(d_out)]
@@ -76,7 +66,7 @@ class DQN(tf.keras.Model):
         # Configure optimiser
         self.opt = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-        self.build((None, FRAME_STACK_SIZE, IMG_SIZE, IMG_SIZE))
+        self.build((None, IMG_SIZE, IMG_SIZE, FRAME_STACK_SIZE))
 
     def call(self, x: np.ndarray) -> np.ndarray:
         _x = x
@@ -168,9 +158,13 @@ class ReplayBuffer:
         # TODO : Better way to build the batch array?
         batch = [
             (
-                np.array([self._data[i + j][0] for j in range(1 - self._stack_size, 1)]),
+                np.transpose(
+                    [self._data[i + j][0] for j in range(1 - self._stack_size, 1)], axes=(1, 2, 0)
+                ),
                 *self._data[i][1:3],
-                np.array([self._data[i + j][3] for j in range(1 - self._stack_size, 1)]),
+                np.transpose(
+                    [self._data[i + j][3] for j in range(1 - self._stack_size, 1)], axes=(1, 2, 0)
+                ),
                 self._data[i][4],
             )
             for i in sample_idxs
@@ -213,7 +207,7 @@ class AgentState:
 
     @property
     def state(self) -> np.ndarray:
-        return np.array(self.frames, ndmin=4)
+        return np.array(np.transpose(self.frames, axes=(1, 2, 0)), ndmin=4)
 
     def append(self, s: _t.Any):
         _s = self._transformer.transform(s)
