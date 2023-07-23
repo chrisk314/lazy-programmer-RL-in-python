@@ -74,12 +74,12 @@ class DQN(tf.keras.Model):
             _x = l(_x)
         return _x
 
-    def sample_action(self, s: int, eps: float = EPSILON) -> int:
+    def sample_action(self, s: np.ndarray, eps: float = EPSILON) -> int:
         if np.random.random() < eps:
             return np.random.choice(self._n_actions)
         return int(np.argmax(self(s)[0]))
 
-    def partial_fit(self, X, actions, Y):
+    def partial_fit(self, X: np.ndarray, actions: _t.Tuple[int, ...], Y: np.ndarray) -> None:
         with tf.GradientTape() as tape:
             action_values = self(X)
             selected_action_values = tf.reduce_sum(
@@ -187,7 +187,7 @@ class ImageTransformer:
         self._bounding_box = bounding_box
         self._size = size
 
-    def transform(self, image: _t.Any) -> _t.Any:  # TODO : Type hints.
+    def transform(self, image: np.ndarray) -> tf.Tensor:
         """Returns game state transformed to agent format."""
         _image = tf.image.rgb_to_grayscale(image)
         _image = tf.image.crop_to_bounding_box(_image, *self._bounding_box)
@@ -211,7 +211,7 @@ class AgentState:
     def state(self) -> np.ndarray:
         return np.array(np.transpose(list(self.frames), axes=(1, 2, 0)), ndmin=4)
 
-    def append(self, s: _t.Any):
+    def append(self, s: np.ndarray) -> None:
         _s = self._transformer.transform(s)
         self.frames.append(_s)
 
@@ -265,7 +265,7 @@ def main() -> int:
     env: Env = make("Breakout-v0")
 
     # Create DQN models
-    d_in = env.observation_space.shape[0]
+    d_in = env.observation_space.shape[0]  # type: ignore
     d_out = 4  # Action space size for Breakout is 4 not env.action_space.n=6.
     # conv sizes (num filters, kernel/filter size, pooling size)
     conv_layer_sizes = [(32, 8, 4), (64, 4, 2), (64, 3, 1)]
