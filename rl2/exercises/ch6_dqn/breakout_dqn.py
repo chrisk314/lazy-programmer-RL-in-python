@@ -32,7 +32,7 @@ FRAME_STACK_SIZE: int = 4  # Number of successive game state frames to use as ag
 
 IMG_SIZE: int = 84  # Number of pixels per dimension in image frames.
 # Bounding box dimensions for image transformer in `tf.image.crop_to_bounding_box` format
-BREAKOUT_BOUNDING_BOX: _t.List[int] = (34, 0, 160, 160)
+BREAKOUT_BOUNDING_BOX: _t.Tuple[int, int, int, int] = (34, 0, 160, 160)
 
 # TODO : Improve architecture to avoid global var.
 # Global iteration counter for target network update.
@@ -46,7 +46,7 @@ class DQN(tf.keras.Model):
         self,
         d_in: int,
         d_out: int,
-        conv_layer_sizes: _t.List[int],
+        conv_layer_sizes: _t.List[_t.Tuple[int, int, int]],
         hidden_layer_sizes: _t.List[int],
         learning_rate: float = ALPHA,
     ) -> None:
@@ -77,7 +77,7 @@ class DQN(tf.keras.Model):
     def sample_action(self, s: int, eps: float = EPSILON) -> int:
         if np.random.random() < eps:
             return np.random.choice(self._n_actions)
-        return np.argmax(self(s)[0])
+        return int(np.argmax(self(s)[0]))
 
     def partial_fit(self, X, actions, Y):
         with tf.GradientTape() as tape:
@@ -89,7 +89,7 @@ class DQN(tf.keras.Model):
         gradients = tape.gradient(loss, self.trainable_variables)
         self.opt.apply_gradients(zip(gradients, self.trainable_variables))
 
-    def train_from_buffer(self, buffer: _t.Deque, Q_t: DQN, gamma: float = GAMMA) -> None:
+    def train_from_buffer(self, buffer: ReplayBuffer, Q_t: DQN, gamma: float = GAMMA) -> None:
         if len(buffer) < MIN_EXPERIENCE:
             # Skip if not enough experience in the buffer yet.
             return
@@ -104,7 +104,7 @@ class DQN(tf.keras.Model):
         # Train the model on the batch.
         self.partial_fit(s, a, G)
 
-    def copy_from(self, other) -> None:
+    def copy_from(self, other: DQN) -> None:
         """Copies network parameters from another `DQN`."""
         self.set_weights(other.get_weights())
 
@@ -172,7 +172,7 @@ class ReplayBuffer:
         return batch
 
 
-def show_image(data: np.ndarray, cmap: _t.Optional[str] = None, vmax: int = 255) -> None:
+def show_image(data: np.ndarray, cmap: str = "Greys", vmax: int = 255) -> None:
     """Display image to screen from numpy array."""
     plt.imshow(data, interpolation="nearest", cmap=cmap, vmin=0, vmax=vmax)
     plt.show()
@@ -181,7 +181,9 @@ def show_image(data: np.ndarray, cmap: _t.Optional[str] = None, vmax: int = 255)
 class ImageTransformer:
     """`ImageTransformer` transforms raw game state images to agent format."""
 
-    def __init__(self, bounding_box: _t.List[int], size: _t.Tuple[int, int]) -> None:
+    def __init__(
+        self, bounding_box: _t.Tuple[int, int, int, int], size: _t.Tuple[int, int]
+    ) -> None:
         self._bounding_box = bounding_box
         self._size = size
 
@@ -207,7 +209,7 @@ class AgentState:
 
     @property
     def state(self) -> np.ndarray:
-        return np.array(np.transpose(self.frames, axes=(1, 2, 0)), ndmin=4)
+        return np.array(np.transpose(list(self.frames), axes=(1, 2, 0)), ndmin=4)
 
     def append(self, s: _t.Any):
         _s = self._transformer.transform(s)
@@ -260,7 +262,7 @@ def play_one_episode_td(
 
 def main() -> int:
     # Set up environment and agent.
-    env = make("Breakout-v0")
+    env: Env = make("Breakout-v0")
 
     # Create DQN models
     d_in = env.observation_space.shape[0]
