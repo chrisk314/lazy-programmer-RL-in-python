@@ -1,3 +1,35 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "lazyprogrammer-rl-courses"
+version = "0.0.0"
+description = ""
+authors = ["Chris Knight <chrisk314@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8.1,<3.11" # 3.11 is the last version that works with tensorflow 2.13.0
+click = "^8.1.6"
+gym = {extras = ["accept-rom-license", "atari", "classic-control"], version = "^0.26.2"}
+matplotlib = "^3.7.2"
+nptyping = "^2.5.0"
+numpy = "<=1.24.3" # 1.24.3 is the last version that works with tensorflow 2.13.0
+pandas = "^2.0.3"
+scikit-learn = "^1.3.0"
+tqdm = "^4.65.0"
+torch = "^2.0.1"
+torchaudio = "^2.0.2"
+torchvision = "^0.15.2"
+tensorflow = "^2.13.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+flake8 = "^6.0.0"
+isort = "^5.12.0"
+mypy = "^1.4.1"
+pytest = "^7.4.0"
+
 [tool.isort]
 profile = "black"
 src_paths = ["exercises/"]
